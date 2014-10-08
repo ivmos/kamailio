@@ -281,6 +281,8 @@ typedef enum {
 	AVP_Service_Provider_Id			= 12013,
 	AVP_Calling_Party_Number		= 12014,
 	AVP_Call_Disconnect_Reason		= 12015,
+	AVP_Number_Plan				= 12016,
+	AVP_Number_Type				= 12017,
 	
 }AAA_AVPCodeNr;
 
@@ -345,10 +347,10 @@ enum  {
 	AVP_Redirect_Address_Type_SIP_URI		= 3
 };
 
-enum  {
+typedef enum  {
 	AVP_Multiple_Services_Indicator_Multiple_Services_Not_Supported	= 0,
 	AVP_Multiple_Services_Indicator_Multiple_Services_Supported		= 1,
-};
+} AVP_Multiple_Services_Indicator_t;
 
 enum  {
 	AVP_Redirect_Action_Direct_Debiting	= 0,
@@ -583,10 +585,40 @@ typedef enum {
 } AVP_Traffic_Case_t;
 
 typedef enum {
-	AVP_Call_Service_Type_Voice 	= 0,
+	AVP_Call_Service_Type_Voice	= 0,
 	AVP_Call_Service_Type_Data	= 1,
 	AVP_Call_Service_Type_Fax	= 2,
 	AVP_Call_Service_Type_Video	= 3
 } AVP_Call_Service_Type_t;
+
+typedef enum {
+	AVP_Number_Plan_MSISDN	= 0
+} AVP_Number_Plan_t;
+
+typedef enum {
+	AVP_Number_Type_International	= 3
+} AVP_Number_Type_t;
+
+typedef enum {
+	AVP_Redirecting_Reason_Unknown							= 0,
+	AVP_Redirecting_Reason_User_Busy						= 1,
+	AVP_Redirecting_Reason_No_Reply							= 2,
+	AVP_Redirecting_Reason_Unconditional					= 3,
+	AVP_Redirecting_Reason_Deflection_During_Alert			= 4,
+	AVP_Redirecting_Reason_Deflection_Immediate_Response	= 5,
+	AVP_Redirecting_Reason_Mobile_Subscriber_Not_Available	= 6
+} AVP_Redirecting_Reason_t;
+
+typedef enum {
+	AVP_Call_Disconnect_Reason_Unspecified				= 0,
+	AVP_Call_Disconnect_Reason_Abandon					= 1,
+	AVP_Call_Disconnect_Reason_Route_Select_Failure		= 2,
+	AVP_Call_Disconnect_Reason_Busy						= 3,
+	AVP_Call_Disconnect_Reason_No_Answer				= 4,
+	AVP_Call_Disconnect_Reason_Not_Reachable			= 5,
+	AVP_Call_Disconnect_Reason_Calling_Party_Disconnect	= 6,
+	AVP_Call_Disconnect_Reason_Called_Party_Disconnect	= 7,
+	AVP_Call_Disconnect_Reason_Service_Release			= 8
+} AVP_Call_Disconnect_Reason_t;
 
 #endif /*DIAMETER_H_*/
