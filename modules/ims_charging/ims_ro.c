@@ -226,7 +226,7 @@ inline int Ro_add_call_disconnect_reason(AAAMessage *msg, AVP_Call_Disconnect_Re
 }
 
 /* called only when building stop record AVPS */
-inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used_unit, int active_rating_group, int active_service_identifier) {
+inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used_unit) {
     AAA_AVP_LIST used_list, mscc_list;
     str used_group;
     char x[4];
@@ -245,13 +245,13 @@ inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used
         Ro_add_avp_list(&mscc_list, used_group.s, used_group.len, AVP_Used_Service_Unit, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
     }
 
-    if (active_service_identifier > 0) {
-        set_4bytes(x, active_service_identifier);
+    if (cfg.service_identifier > 0) {
+        set_4bytes(x, cfg.service_identifier);
         Ro_add_avp_list(&mscc_list, x, 4, AVP_Service_Identifier, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
     }
 
-    if (active_rating_group > 0) {
-        set_4bytes(x, active_rating_group);
+    if (cfg.rating_group > 0) {
+        set_4bytes(x, cfg.rating_group);
         Ro_add_avp_list(&mscc_list, x, 4, AVP_Rating_Group, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
     }
 
@@ -261,7 +261,7 @@ inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used
     return Ro_add_avp(msg, used_group.s, used_group.len, AVP_Multiple_Services_Credit_Control, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
 }
 
-inline int Ro_add_multiple_service_credit_Control(AAAMessage *msg, unsigned int requested_unit, int used_unit, int rating_group, int service_identifier) {
+inline int Ro_add_multiple_service_credit_Control(AAAMessage *msg, unsigned int requested_unit, int used_unit) {
     AAA_AVP_LIST list, used_list, mscc_list;
     str group, used_group;
     char x[4];
@@ -280,13 +280,13 @@ inline int Ro_add_multiple_service_credit_Control(AAAMessage *msg, unsigned int 
 
     Ro_add_avp_list(&mscc_list, group.s, group.len, AVP_Requested_Service_Unit, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
 
-    if (service_identifier > 0) {
-        set_4bytes(x, service_identifier);
+    if (cfg.service_identifier > 0) {
+        set_4bytes(x, cfg.service_identifier);
         Ro_add_avp_list(&mscc_list, x, 4, AVP_Service_Identifier, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
     }
 
-    if (rating_group > 0) {
-        set_4bytes(x, rating_group);
+    if (cfg.rating_group > 0) {
+        set_4bytes(x, cfg.rating_group);
         Ro_add_avp_list(&mscc_list, x, 4, AVP_Rating_Group, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
     }
 
@@ -697,7 +697,7 @@ void send_ccr_interim(struct ro_session* ro_session, unsigned int used, unsigned
         LM_ERR("Problem adding Multiple-Services-Indicator data\n");
     }
 
-    if (!Ro_add_multiple_service_credit_Control(ccr, interim_request_credits/*INTERIM_CREDIT_REQ_AMOUNT*/, used, cfg.rating_group, cfg.service_identifier)) {
+    if (!Ro_add_multiple_service_credit_Control(ccr, interim_request_credits/*INTERIM_CREDIT_REQ_AMOUNT*/, used)) {
         LM_ERR("Problem adding Multiple Service Credit Control data\n");
     }
 
@@ -912,7 +912,7 @@ void send_ccr_stop(struct ro_session *ro_session) {
         LM_ERR("Problem adding Multiple-Services-Indicator data\n");
     }
     
-    if (!Ro_add_multiple_service_credit_Control_stop(ccr, used, cfg.rating_group, cfg.service_identifier)) {
+    if (!Ro_add_multiple_service_credit_Control_stop(ccr, used)) {
         LM_ERR("Problem adding Multiple Service Credit Control data\n");
     }
     
@@ -1113,7 +1113,7 @@ int Ro_Send_CCR(struct sip_msg *msg, str* direction, str* charge_type, str* unit
         LM_ERR("Problem adding Multiple-Services-Indicator data\n");
     }
 
-    if (!Ro_add_multiple_service_credit_Control(ccr, reservation_units, -1, cfg.rating_group, cfg.service_identifier)) {
+    if (!Ro_add_multiple_service_credit_Control(ccr, reservation_units, -1)) {
         LM_ERR("Problem adding Multiple Service Credit Control data\n");
         goto error;
     }
