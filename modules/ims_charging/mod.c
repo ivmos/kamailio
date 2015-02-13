@@ -116,18 +116,18 @@ static param_export_t params[] = {
 		{ "service_context_id_mnc", STR_PARAM,			&ro_service_context_id_mnc_s 	},
 		{ "service_context_id_mcc", STR_PARAM,			&ro_service_context_id_mcc_s 	},
 		{ "service_context_id_release",	STR_PARAM, 		&ro_service_context_id_release_s},
-        { "service_parameter_type_caller",	INT_PARAM,			&service_parameter_type_caller		},
-        { "service_parameter_type_called",	INT_PARAM,			&service_parameter_type_called		},
-        { "service_parameter_type_mtmo",	INT_PARAM,			&service_parameter_type_mtmo		},
-        { "service_parameter_type_location_type",	INT_PARAM,			&service_parameter_type_location_type		},
-        { "service_parameter_type_location",	INT_PARAM,			&service_parameter_type_location		},
-        { "service_parameter_type_routing_case",	INT_PARAM,			&service_parameter_type_routing_case		},
-        { "service_parameter_value_location_type",	INT_PARAM,			&service_parameter_value_location_type		},
-        { "service_parameter_value_location",	STR_PARAM,			&service_parameter_value_location_s		},
-        { "service_parameter_value_routing_case",	INT_PARAM,			&service_parameter_value_routing_case		},
-        { "service_identifier",	INT_PARAM,			&service_identifier		},
-        { "rating_group",	INT_PARAM,			&rating_group		},
-        { 0, 0, 0 }
+		{ "service_parameter_type_caller",	INT_PARAM,			&service_parameter_type_caller		},
+		{ "service_parameter_type_called",	INT_PARAM,			&service_parameter_type_called		},
+		{ "service_parameter_type_mtmo",	INT_PARAM,			&service_parameter_type_mtmo		},
+		{ "service_parameter_type_location_type",	INT_PARAM,			&service_parameter_type_location_type		},
+		{ "service_parameter_type_location",	INT_PARAM,			&service_parameter_type_location		},
+		{ "service_parameter_type_routing_case",	INT_PARAM,			&service_parameter_type_routing_case		},
+		{ "service_parameter_value_location_type",	INT_PARAM,			&service_parameter_value_location_type		},
+		{ "service_parameter_value_location",	STR_PARAM,			&service_parameter_value_location_s		},
+		{ "service_parameter_value_routing_case",	INT_PARAM,			&service_parameter_value_routing_case		},
+		{ "service_identifier",	INT_PARAM,			&service_identifier		},
+		{ "rating_group",	INT_PARAM,			&rating_group		},
+		{ 0, 0, 0 }
 };
 
 stat_export_t charging_stats[] = {
@@ -227,20 +227,20 @@ int fix_parameters() {
 		return 0;
 	}
 
-    cfg.service_parameter_type_caller = service_parameter_type_caller;
-    cfg.service_parameter_type_called = service_parameter_type_called;
-    cfg.service_parameter_type_mtmo = service_parameter_type_mtmo;
-    cfg.service_parameter_type_location_type = service_parameter_type_location_type;
-    cfg.service_parameter_type_location = service_parameter_type_location;
-    cfg.service_parameter_type_routing_case = service_parameter_type_routing_case;
+	cfg.service_parameter_type_caller = service_parameter_type_caller;
+	cfg.service_parameter_type_called = service_parameter_type_called;
+	cfg.service_parameter_type_mtmo = service_parameter_type_mtmo;
+	cfg.service_parameter_type_location_type = service_parameter_type_location_type;
+	cfg.service_parameter_type_location = service_parameter_type_location;
+	cfg.service_parameter_type_routing_case = service_parameter_type_routing_case;
 
-    cfg.service_parameter_value_location_type = service_parameter_value_location_type;
-    cfg.service_parameter_value_location.s = service_parameter_value_location_s;
-    cfg.service_parameter_value_location.len = strlen(service_parameter_value_location_s);
-    cfg.service_parameter_value_routing_case = service_parameter_value_routing_case;
+	cfg.service_parameter_value_location_type = service_parameter_value_location_type;
+	cfg.service_parameter_value_location.s = service_parameter_value_location_s;
+	cfg.service_parameter_value_location.len = strlen(service_parameter_value_location_s);
+	cfg.service_parameter_value_routing_case = service_parameter_value_routing_case;
 
-    cfg.service_identifier = service_identifier;
-    cfg.rating_group = rating_group;
+	cfg.service_identifier = service_identifier;
+	cfg.rating_group = rating_group;
 
 	return 1;
 }
