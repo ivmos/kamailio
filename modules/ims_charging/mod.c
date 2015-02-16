@@ -45,7 +45,7 @@ int service_parameter_type_location_type = 0; // 0 = not used
 int service_parameter_type_location = 0; // 0 = not used
 int service_parameter_type_routing_case = 0; // 0 = not used
 int service_parameter_value_location_type = 1;
-char* service_parameter_value_location_s = "34111111111";
+char* service_parameter_value_location_s = NULL;
 int service_parameter_value_routing_case = 1;
 int service_identifier = 1000;
 int rating_group = 0; // 0 = no rating group
@@ -235,8 +235,14 @@ int fix_parameters() {
 	cfg.service_parameter_type_routing_case = service_parameter_type_routing_case;
 
 	cfg.service_parameter_value_location_type = service_parameter_value_location_type;
-	cfg.service_parameter_value_location.s = service_parameter_value_location_s;
-	cfg.service_parameter_value_location.len = strlen(service_parameter_value_location_s);
+
+	if (service_parameter_value_location_s != NULL) {
+		cfg.service_parameter_value_location.s = service_parameter_value_location_s;
+		cfg.service_parameter_value_location.len = strlen(service_parameter_value_location_s);
+	} else {
+		LM_ERR("fix_parameters: service_parameter_value_location_s is NULL\n");
+	}
+
 	cfg.service_parameter_value_routing_case = service_parameter_value_routing_case;
 
 	cfg.service_identifier = service_identifier;

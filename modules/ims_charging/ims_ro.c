@@ -1155,7 +1155,7 @@ int Ro_Send_CCR(struct sip_msg *msg, str* direction, str* charge_type, str* unit
         goto error;
     }
 
-    if (cfg.service_parameter_type_location != 0 &&
+    if (cfg.service_parameter_type_location != 0 && cfg.service_parameter_value_location.len > 0 &&
             !Ro_add_service_parameter_info_str(ccr, cfg.service_parameter_type_location, cfg.service_parameter_value_location)) {
         LM_ERR("Problem adding Service Parameter Info data for location\n");
         goto error;
