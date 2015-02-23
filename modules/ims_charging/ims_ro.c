@@ -29,6 +29,7 @@
 #include "config.h"
 #include "ro_session_hash.h"
 #include "stats.h"
+#include "../dialog/dlg_hash.h"
 
 extern struct tm_binds tmb;
 extern struct cdp_binds cdpb;
@@ -230,8 +231,6 @@ inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used
     str used_group;
     char x[4];
 
-    unsigned int service_id = 1000; //VOICE TODO FIX as config item
-
     used_list.head = 0;
     used_list.tail = 0;
     mscc_list.head = 0;
@@ -246,8 +245,15 @@ inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used
         Ro_add_avp_list(&mscc_list, used_group.s, used_group.len, AVP_Used_Service_Unit, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
     }
 
-    set_4bytes(x, service_id);
-    Ro_add_avp_list(&mscc_list, x, 4, AVP_Service_Identifier, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+    if (cfg.service_identifier > 0) {
+        set_4bytes(x, cfg.service_identifier);
+        Ro_add_avp_list(&mscc_list, x, 4, AVP_Service_Identifier, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+    }
+
+    if (cfg.rating_group > 0) {
+        set_4bytes(x, cfg.rating_group);
+        Ro_add_avp_list(&mscc_list, x, 4, AVP_Rating_Group, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+    }
 
     used_group = cdpb.AAAGroupAVPS(mscc_list);
     cdpb.AAAFreeAVPList(&mscc_list);
@@ -258,7 +264,6 @@ inline int Ro_add_multiple_service_credit_Control_stop(AAAMessage *msg, int used
 inline int Ro_add_multiple_service_credit_Control(AAAMessage *msg, unsigned int requested_unit, int used_unit) {
     AAA_AVP_LIST list, used_list, mscc_list;
     str group, used_group;
-    unsigned int service_id = 1000; //VOICE TODO FIX as config item - should be a MAP that can be identified based on SDP params
     char x[4];
 
     list.head = 0;
@@ -275,8 +280,15 @@ inline int Ro_add_multiple_service_credit_Control(AAAMessage *msg, unsigned int 
 
     Ro_add_avp_list(&mscc_list, group.s, group.len, AVP_Requested_Service_Unit, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
 
-    set_4bytes(x, service_id);
-    Ro_add_avp_list(&mscc_list, x, 4, AVP_Service_Identifier, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+    if (cfg.service_identifier > 0) {
+        set_4bytes(x, cfg.service_identifier);
+        Ro_add_avp_list(&mscc_list, x, 4, AVP_Service_Identifier, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+    }
+
+    if (cfg.rating_group > 0) {
+        set_4bytes(x, cfg.rating_group);
+        Ro_add_avp_list(&mscc_list, x, 4, AVP_Rating_Group, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+    }
 
     /* if we must Used-Service-Unit */
     if (used_unit >= 0) {
@@ -291,6 +303,37 @@ inline int Ro_add_multiple_service_credit_Control(AAAMessage *msg, unsigned int 
     cdpb.AAAFreeAVPList(&mscc_list);
 
     return Ro_add_avp(msg, group.s, group.len, AVP_Multiple_Services_Credit_Control, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
+}
+
+inline int Ro_add_service_parameter_info_str(AAAMessage *msg, unsigned int type, str value) {
+    return Ro_add_service_parameter_info(msg, type, value.s, value.len);
+}
+
+
+inline int Ro_add_service_parameter_info_uint(AAAMessage *msg, unsigned int type, unsigned int value) {
+    char x[4];
+    set_4bytes(x, value);
+    return Ro_add_service_parameter_info(msg, type, x, 4);
+}
+
+
+inline int Ro_add_service_parameter_info(AAAMessage *msg, unsigned int type, char *data, int len) {
+    char x[4];
+    AAA_AVP_LIST spi_pair;
+    str group;
+
+    spi_pair.head = 0;
+    spi_pair.tail = 0;
+
+    set_4bytes(x, type);
+    Ro_add_avp_list(&spi_pair, x, 4, AVP_Service_Parameter_Type, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+
+    Ro_add_avp_list(&spi_pair, data, len, AVP_Service_Parameter_Value, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
+
+    group = cdpb.AAAGroupAVPS(spi_pair);
+    cdpb.AAAFreeAVPList(&spi_pair);
+
+    return Ro_add_avp(msg, group.s, group.len, AVP_Service_Parameter_Info, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
 }
 
 inline int Ro_add_multiple_services_indicator(AAAMessage *msg, AVP_Multiple_Services_Indicator_t indicator_value) {
@@ -356,6 +399,12 @@ inline int Ro_add_vendor_specific_appid(AAAMessage *msg, unsigned int vendor_id,
     cdpb.AAAFreeAVPList(&list);
 
     return Ro_add_avp(msg, group.s, group.len, AVP_Vendor_Specific_Application_Id, AAA_AVP_FLAG_MANDATORY, 0, AVP_FREE_DATA, __FUNCTION__);
+}
+
+inline int Ro_add_auth_appid(AAAMessage *msg, unsigned int auth_id) {
+    char x[4];
+    set_4bytes(x, auth_id);
+    return Ro_add_avp(msg, x, 4, AVP_Auth_Application_Id, AAA_AVP_FLAG_MANDATORY, 0, AVP_DUPLICATE_DATA, __FUNCTION__);
 }
 
 int get_sip_header_info(struct sip_msg * req,
@@ -618,9 +667,16 @@ void send_ccr_interim(struct ro_session* ro_session, unsigned int used, unsigned
     if (!(ccr = Ro_new_ccr(auth, ro_ccr_data)))
         goto error;
 
-    if (!Ro_add_vendor_specific_appid(ccr, IMS_vendor_id_3GPP, IMS_Ro, 0/*acct id*/)) {
-        LM_ERR("Problem adding Vendor specific ID\n");
+    if (cfg.mode == RO_MODE_RFC_4006) {
+        if (!Ro_add_auth_appid(ccr, IMS_Ro)) {
+                    LM_ERR("Problem adding Auth-Application-Id\n");
+        }
+    } else {
+        if (!Ro_add_vendor_specific_appid(ccr, IMS_vendor_id_3GPP, IMS_Ro, 0/*acct id*/)) {
+                    LM_ERR("Problem adding Vendor specific ID\n");
+        }
     }
+
     ro_session->hop_by_hop += 1;
     if (!Ro_add_cc_request(ccr, RO_CC_INTERIM, ro_session->hop_by_hop)) {
         LM_ERR("Problem adding CC-Request data\n");
@@ -825,8 +881,14 @@ void send_ccr_stop(struct ro_session *ro_session) {
 
     LM_DBG("Created new CCR\n");
 
-    if (!Ro_add_vendor_specific_appid(ccr, IMS_vendor_id_3GPP, IMS_Ro, 0)) {
-        LM_ERR("Problem adding Vendor specific ID\n");
+    if (cfg.mode == RO_MODE_RFC_4006) {
+        if (!Ro_add_auth_appid(ccr, IMS_Ro)) {
+                    LM_ERR("Problem adding Auth-Application-Id\n");
+        }
+    } else {
+        if (!Ro_add_vendor_specific_appid(ccr, IMS_vendor_id_3GPP, IMS_Ro, 0/*acct id*/)) {
+                    LM_ERR("Problem adding Vendor specific ID\n");
+        }
     }
    
     ro_session->hop_by_hop += 1;
@@ -943,11 +1005,14 @@ error:
 int Ro_Send_CCR(struct sip_msg *msg, str* direction, str* charge_type, str* unit_type, int reservation_units,
 						cfg_action_t* action, unsigned int tindex, unsigned int tlabel) {
 	str session_id = { 0, 0 },
-		asserted_id_uri	= { 0, 0 };
+		asserted_id_uri	= { 0, 0 },
+        caller_msisdn	= { 0, 0 },
+        called_msisdn	= { 0, 0 };
 	AAASession* cc_acc_session = NULL;
     Ro_CCR_t * ro_ccr_data = 0;
     AAAMessage * ccr = 0;
     int dir = 0;
+    struct sip_uri from, to;
     struct ro_session *new_session = 0;
     struct session_setup_data *ssd = shm_malloc(sizeof(struct session_setup_data)); // lookup structure used to load session info from cdp callback on CCA
 
@@ -1002,9 +1067,16 @@ int Ro_Send_CCR(struct sip_msg *msg, str* direction, str* charge_type, str* unit
     if (!(ccr = Ro_new_ccr(cc_acc_session, ro_ccr_data)))
         goto error;
 
-    if (!Ro_add_vendor_specific_appid(ccr, IMS_vendor_id_3GPP, IMS_Ro, 0)) {
-        LM_ERR("Problem adding Vendor specific ID\n");
-        goto error;
+    if (cfg.mode == RO_MODE_RFC_4006) {
+        if (!Ro_add_auth_appid(ccr, IMS_Ro)) {
+                    LM_ERR("Problem adding Auth-Application-Id\n");
+            goto error;
+        }
+    } else {
+        if (!Ro_add_vendor_specific_appid(ccr, IMS_vendor_id_3GPP, IMS_Ro, 0/*acct id*/)) {
+                    LM_ERR("Problem adding Vendor specific ID\n");
+            goto error;
+        }
     }
 
     if (!Ro_add_cc_request(ccr, cc_event_type, cc_event_number)) {
@@ -1043,6 +1115,55 @@ int Ro_Send_CCR(struct sip_msg *msg, str* direction, str* charge_type, str* unit
 
     if (!Ro_add_multiple_service_credit_Control(ccr, reservation_units, -1)) {
         LM_ERR("Problem adding Multiple Service Credit Control data\n");
+        goto error;
+    }
+
+    if (parse_uri(get_from(msg)->uri.s, get_from(msg)->uri.len, &from)<0) {
+        LM_ERR("Problem parsing from header\n");
+        goto error;
+    }
+    caller_msisdn.s = from.user.s;
+    caller_msisdn.len = from.user.len;
+    if (cfg.service_parameter_type_caller != 0 &&
+            !Ro_add_service_parameter_info_str(ccr, cfg.service_parameter_type_caller, caller_msisdn)) {
+                LM_ERR("Problem adding Service Parameter Info data for caller\n");
+        goto error;
+    }
+
+    if (parse_uri(get_to(msg)->uri.s, get_to(msg)->uri.len, &to)<0) {
+        LM_ERR("Problem parsing to header\n");
+        goto error;
+    }
+    called_msisdn.s = to.user.s;
+    called_msisdn.len = to.user.len;
+    if (cfg.service_parameter_type_called != 0 &&
+            !Ro_add_service_parameter_info_str(ccr, cfg.service_parameter_type_called, called_msisdn)) {
+                LM_ERR("Problem adding Service Parameter Info data for called\n");
+        goto error;
+    }
+
+    unsigned int service_parameter_value_mtmo = 0; // 0 for outgoing
+    if (cfg.service_parameter_type_mtmo != 0 &&
+            !Ro_add_service_parameter_info_uint(ccr, cfg.service_parameter_type_mtmo, service_parameter_value_mtmo)) {
+                LM_ERR("Problem adding Service Parameter Info data for mtmo\n");
+        goto error;
+    }
+
+    if (cfg.service_parameter_type_location_type != 0 &&
+            !Ro_add_service_parameter_info_uint(ccr, cfg.service_parameter_type_location_type, cfg.service_parameter_value_location_type)) {
+                LM_ERR("Problem adding Service Parameter Info data for location type\n");
+        goto error;
+    }
+
+    if (cfg.service_parameter_type_location != 0 && cfg.service_parameter_value_location.len > 0 &&
+            !Ro_add_service_parameter_info_str(ccr, cfg.service_parameter_type_location, cfg.service_parameter_value_location)) {
+        LM_ERR("Problem adding Service Parameter Info data for location\n");
+        goto error;
+    }
+
+    if (cfg.service_parameter_type_routing_case != 0 &&
+            !Ro_add_service_parameter_info_uint(ccr, cfg.service_parameter_type_routing_case, cfg.service_parameter_value_routing_case)) {
+                LM_ERR("Problem adding Service Parameter Info data for routing case\n");
         goto error;
     }
 

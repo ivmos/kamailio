@@ -38,6 +38,17 @@ static int ro_session_hash_size = 4096;
 int ro_timer_buffer = 5;
 int interim_request_credits = 30;
 int default_validity_time = 0;
+int service_parameter_type_caller = 0; // 0 = not used
+int service_parameter_type_called = 0; // 0 = not used
+int service_parameter_type_mtmo = 0; // 0 = not used
+int service_parameter_type_location_type = 0; // 0 = not used
+int service_parameter_type_location = 0; // 0 = not used
+int service_parameter_type_routing_case = 0; // 0 = not used
+int service_parameter_value_location_type = 1;
+char* service_parameter_value_location_s = NULL;
+int service_parameter_value_routing_case = 1;
+int service_identifier = 1000;
+int rating_group = 0; // 0 = no rating group
 client_ro_cfg cfg;
 
 struct cdp_binds cdpb;
@@ -105,6 +116,17 @@ static param_export_t params[] = {
 		{ "service_context_id_mnc", STR_PARAM,			&ro_service_context_id_mnc_s 	},
 		{ "service_context_id_mcc", STR_PARAM,			&ro_service_context_id_mcc_s 	},
 		{ "service_context_id_release",	STR_PARAM, 		&ro_service_context_id_release_s},
+		{ "service_parameter_type_caller",	INT_PARAM,			&service_parameter_type_caller		},
+		{ "service_parameter_type_called",	INT_PARAM,			&service_parameter_type_called		},
+		{ "service_parameter_type_mtmo",	INT_PARAM,			&service_parameter_type_mtmo		},
+		{ "service_parameter_type_location_type",	INT_PARAM,			&service_parameter_type_location_type		},
+		{ "service_parameter_type_location",	INT_PARAM,			&service_parameter_type_location		},
+		{ "service_parameter_type_routing_case",	INT_PARAM,			&service_parameter_type_routing_case		},
+		{ "service_parameter_value_location_type",	INT_PARAM,			&service_parameter_value_location_type		},
+		{ "service_parameter_value_location",	STR_PARAM,			&service_parameter_value_location_s		},
+		{ "service_parameter_value_routing_case",	INT_PARAM,			&service_parameter_value_routing_case		},
+		{ "service_identifier",	INT_PARAM,			&service_identifier		},
+		{ "rating_group",	INT_PARAM,			&rating_group		},
 		{ 0, 0, 0 }
 };
 
@@ -204,6 +226,27 @@ int fix_parameters() {
 		LM_ERR("fix_parameters: error while creating service_context_id\n");
 		return 0;
 	}
+
+	cfg.service_parameter_type_caller = service_parameter_type_caller;
+	cfg.service_parameter_type_called = service_parameter_type_called;
+	cfg.service_parameter_type_mtmo = service_parameter_type_mtmo;
+	cfg.service_parameter_type_location_type = service_parameter_type_location_type;
+	cfg.service_parameter_type_location = service_parameter_type_location;
+	cfg.service_parameter_type_routing_case = service_parameter_type_routing_case;
+
+	cfg.service_parameter_value_location_type = service_parameter_value_location_type;
+
+	if (service_parameter_value_location_s != NULL) {
+		cfg.service_parameter_value_location.s = service_parameter_value_location_s;
+		cfg.service_parameter_value_location.len = strlen(service_parameter_value_location_s);
+	} else {
+		LM_ERR("fix_parameters: service_parameter_value_location_s is NULL\n");
+	}
+
+	cfg.service_parameter_value_routing_case = service_parameter_value_routing_case;
+
+	cfg.service_identifier = service_identifier;
+	cfg.rating_group = rating_group;
 
 	return 1;
 }
