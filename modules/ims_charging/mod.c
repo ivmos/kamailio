@@ -49,6 +49,7 @@ char* service_parameter_value_location_s = NULL;
 int service_parameter_value_routing_case = 1;
 int service_identifier = 1000;
 int rating_group = 0; // 0 = no rating group
+int ro_subscriber_uri_format = 0; // SIP_URI
 client_ro_cfg cfg;
 
 struct cdp_binds cdpb;
@@ -127,6 +128,7 @@ static param_export_t params[] = {
 		{ "service_parameter_value_routing_case",	INT_PARAM,			&service_parameter_value_routing_case		},
 		{ "service_identifier",	INT_PARAM,			&service_identifier		},
 		{ "rating_group",	INT_PARAM,			&rating_group		},
+		{ "subscriber_uri_format", INT_PARAM,		&ro_subscriber_uri_format		},
 		{ 0, 0, 0 }
 };
 
@@ -247,6 +249,7 @@ int fix_parameters() {
 
 	cfg.service_identifier = service_identifier;
 	cfg.rating_group = rating_group;
+	cfg.subscriber_uri_format = (subscr_uri_t)ro_subscriber_uri_format;
 
 	return 1;
 }

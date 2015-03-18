@@ -7,6 +7,11 @@ typedef enum {
     RO_MODE_RFC_4006 = 2
 } ro_ccr_mode_t;
 
+typedef enum {
+    SIP_URI = 0,
+    TEL_URI = 1
+} subscr_uri_t;
+
 typedef struct {
     ro_ccr_mode_t mode;
     uint32_t default_validity_time;
@@ -28,6 +33,7 @@ typedef struct {
     uint32_t service_parameter_value_routing_case;
     uint32_t service_identifier;
     uint32_t rating_group;
+    subscr_uri_t subscriber_uri_format;
 } client_ro_cfg;
 
 #endif
